@@ -1,0 +1,111 @@
+import { ResumeData } from "./types";
+
+export const sampleData: ResumeData = {
+  fullName: "Alex Rivera",
+  title: "Marketing Specialist",
+  email: "alex.rivera@email.com",
+  phone: "0917 123 4567",
+  location: "Tanza, Cavite",
+  links: "linkedin.com/in/alexrivera",
+  summary:
+    "Marketing specialist with 4 years of experience running social campaigns and coordinating local events for retail brands. Known for hitting deadlines and keeping stakeholders in the loop.",
+  experience: [
+    {
+      id: "exp-1",
+      role: "Marketing Associate",
+      company: "Coastal Retail Group",
+      location: "Cavite",
+      startDate: "Jun 2022",
+      endDate: "Present",
+      current: true,
+      bullets: [
+        "Ran monthly social media calendar across 3 platforms, growing engagement by 38%",
+        "Coordinated 12 in-store promotional events with vendor and logistics teams",
+      ],
+    },
+    {
+      id: "exp-2",
+      role: "Marketing Assistant",
+      company: "Bright Path Agency",
+      location: "Cavite",
+      startDate: "Jan 2020",
+      endDate: "May 2022",
+      current: false,
+      bullets: [
+        "Supported campaign reporting and client presentation decks",
+        "Managed influencer outreach for 5 local brand partnerships",
+      ],
+    },
+  ],
+  education: [
+    {
+      id: "edu-1",
+      degree: "BS in Marketing Management",
+      school: "Cavite State University",
+      location: "Indang, Cavite",
+      startDate: "2016",
+      endDate: "2020",
+    },
+  ],
+  skills: [
+    "Social Media Management",
+    "Canva & Adobe Photoshop",
+    "Event Coordination",
+    "Basic Data Reporting",
+    "Customer Relations",
+  ],
+  certifications: ["Meta Certified Digital Marketing Associate (2023)"],
+  languages: [
+    { id: "lang-1", name: "English", level: "Fluent" },
+    { id: "lang-2", name: "Filipino", level: "Native" },
+  ],
+  references: [
+    {
+      id: "ref-1",
+      name: "Maria Santos",
+      relation: "Marketing Director, Coastal Retail Group",
+      phone: "0917 555 2211",
+      email: "maria.santos@coastalretail.com",
+    },
+  ],
+  personal: {
+    birthDate: "",
+    placeOfBirth: "",
+    age: "",
+    gender: "",
+    civilStatus: "",
+    nationality: "",
+    religion: "",
+    height: "",
+    weight: "",
+  },
+  photoDataUrl: undefined,
+};
+
+export const emptyData: ResumeData = {
+  fullName: "",
+  title: "",
+  email: "",
+  phone: "",
+  location: "",
+  links: "",
+  summary: "",
+  experience: [],
+  education: [],
+  skills: [],
+  certifications: [],
+  languages: [],
+  references: [],
+  personal: {
+    birthDate: "",
+    placeOfBirth: "",
+    age: "",
+    gender: "",
+    civilStatus: "",
+    nationality: "",
+    religion: "",
+    height: "",
+    weight: "",
+  },
+  photoDataUrl: undefined,
+};
