@@ -212,16 +212,16 @@ export default function TemplateGallery({
   onSelect,
 }: TemplateGalleryProps) {
   return (
-    <div className="flex h-full w-full flex-col bg-ink-900">
-      <div className="flex items-center gap-3 border-b border-ink-700 px-6 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-stamp text-paper-100">
+    <div className="flex h-full w-full flex-col bg-ink-800">
+      <div className="flex items-center gap-3 border-b border-ink-700 bg-stamp px-6 py-5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-stamp">
           <Printer size={18} strokeWidth={2.25} />
         </div>
         <div className="leading-tight">
-          <p className="font-display text-[15px] font-bold tracking-tight text-paper-100">
+          <p className="font-display text-[15px] font-bold tracking-tight text-white">
             DS Prints
           </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-600">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">
             Document Formatter
           </p>
         </div>
@@ -230,8 +230,8 @@ export default function TemplateGallery({
       <div className="flex-1 overflow-y-auto px-6 py-8">
         <div className="mx-auto max-w-5xl">
           <div className="mb-8 flex items-center gap-2">
-            <FileText size={16} className="text-stamp-light" />
-            <h1 className="font-display text-[20px] font-semibold tracking-tight text-paper-100">
+            <FileText size={16} className="text-stamp" />
+            <h1 className="font-display text-[20px] font-semibold tracking-tight text-stamp-dark">
               Choose a resume template
             </h1>
           </div>
@@ -241,14 +241,14 @@ export default function TemplateGallery({
               <button
                 key={template.id}
                 onClick={() => onSelect(template.id)}
-                className="group flex flex-col overflow-hidden rounded-xl border border-ink-700 bg-ink-800/50 text-left transition-colors hover:border-ink-600 hover:bg-ink-800"
+                className="group flex flex-col overflow-hidden rounded-xl border border-ink-700 bg-white text-left shadow-sm transition-all hover:border-stamp hover:shadow-md"
               >
-                <div className="aspect-[3/4] w-full bg-ink-950 p-4">
+                <div className="aspect-[3/4] w-full bg-ink-900 p-4">
                   <MiniPreview template={template} />
                 </div>
-                <div className="flex flex-col gap-1.5 border-t border-ink-700 p-4">
+                <div className="flex flex-col gap-1.5 border-t border-ink-700 bg-white p-4">
                   <div className="flex items-center justify-between">
-                    <span className="font-display text-[14px] font-semibold tracking-tight text-paper-100">
+                    <span className="font-display text-[14px] font-semibold tracking-tight text-stamp-dark">
                       {template.name}
                     </span>
                     <span
@@ -259,11 +259,11 @@ export default function TemplateGallery({
                   <p className="text-[12px] leading-snug text-ink-600">
                     {template.description}
                   </p>
-                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-600">
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-stamp/70">
                     Best for: {template.bestFor}
                   </p>
                 </div>
-                <div className="border-t border-ink-700 px-4 py-2.5 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-stamp-light opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="border-t border-ink-700 bg-stamp px-4 py-2.5 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-white opacity-0 transition-opacity group-hover:opacity-100">
                   Use this template
                 </div>
               </button>

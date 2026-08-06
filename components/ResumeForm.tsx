@@ -17,9 +17,9 @@ interface ResumeFormProps {
 }
 
 const inputClass =
-  "w-full rounded-md border border-ink-700 bg-ink-800 px-3 py-2 text-[13px] text-paper-100 placeholder:text-ink-600 outline-none focus:border-stamp/60";
+  "w-full rounded-md border border-ink-700 bg-white px-3 py-2 text-[13px] text-stamp-dark placeholder:text-ink-600 outline-none focus:border-stamp/60";
 const labelClass =
-  "mb-1 block font-mono text-[10px] uppercase tracking-[0.1em] text-ink-600";
+  "mb-1 block font-mono text-[10px] uppercase tracking-[0.1em] text-stamp/80";
 
 function newId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
@@ -157,7 +157,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
     <div className="form-scroll flex h-full flex-col gap-6 overflow-y-auto px-5 py-5">
       {/* ID photo */}
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+        <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
           ID photo
         </h2>
         <p className="text-[11px] text-ink-600">
@@ -172,7 +172,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
 
       {/* Personal details */}
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+        <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
           Personal details
         </h2>
         <div className="grid grid-cols-2 gap-3">
@@ -235,7 +235,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
 
       {/* Personal information (used by ID/formal templates) */}
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+        <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
           Personal information
         </h2>
         <p className="text-[11px] text-ink-600">
@@ -331,7 +331,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
 
       {/* Summary */}
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+        <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
           Summary / Objective
         </h2>
         <textarea
@@ -345,12 +345,12 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
       {/* Experience */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+          <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
             Experience
           </h2>
           <button
             onClick={addExperience}
-            className="flex items-center gap-1 rounded-md border border-ink-700 px-2.5 py-1 text-[11px] text-paper-200 hover:border-ink-600 hover:bg-ink-800"
+            className="flex items-center gap-1 rounded-md border border-ink-700 px-2.5 py-1 text-[11px] text-stamp hover:border-stamp hover:bg-ink-800"
           >
             <Plus size={12} /> Add
           </button>
@@ -366,15 +366,15 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
           {data.experience.map((exp) => (
             <div
               key={exp.id}
-              className="flex flex-col gap-2 rounded-lg border border-ink-700 bg-ink-800/40 p-3"
+              className="flex flex-col gap-2 rounded-lg border border-ink-700 bg-paper-200 p-3"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-600">
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-stamp/70">
                   Job
                 </span>
                 <button
                   onClick={() => removeExperience(exp.id)}
-                  className="text-ink-600 hover:text-stamp-light"
+                  className="text-ink-600 hover:text-stamp"
                   aria-label="Remove job"
                 >
                   <Trash2 size={13} />
@@ -450,7 +450,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
                     />
                     <button
                       onClick={() => removeBullet(exp.id, idx)}
-                      className="shrink-0 text-ink-600 hover:text-stamp-light"
+                      className="shrink-0 text-ink-600 hover:text-stamp"
                       aria-label="Remove highlight"
                     >
                       <Trash2 size={13} />
@@ -459,7 +459,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
                 ))}
                 <button
                   onClick={() => addBullet(exp.id)}
-                  className="mt-1 self-start text-[11px] text-signal hover:text-signal-light"
+                  className="mt-1 self-start text-[11px] text-stamp hover:text-stamp-light"
                 >
                   + Add highlight
                 </button>
@@ -472,12 +472,12 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
       {/* Education */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+          <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
             Education
           </h2>
           <button
             onClick={addEducation}
-            className="flex items-center gap-1 rounded-md border border-ink-700 px-2.5 py-1 text-[11px] text-paper-200 hover:border-ink-600 hover:bg-ink-800"
+            className="flex items-center gap-1 rounded-md border border-ink-700 px-2.5 py-1 text-[11px] text-stamp hover:border-stamp hover:bg-ink-800"
           >
             <Plus size={12} /> Add
           </button>
@@ -491,15 +491,15 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
           {data.education.map((edu) => (
             <div
               key={edu.id}
-              className="flex flex-col gap-2 rounded-lg border border-ink-700 bg-ink-800/40 p-3"
+              className="flex flex-col gap-2 rounded-lg border border-ink-700 bg-paper-200 p-3"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-600">
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-stamp/70">
                   School
                 </span>
                 <button
                   onClick={() => removeEducation(edu.id)}
-                  className="text-ink-600 hover:text-stamp-light"
+                  className="text-ink-600 hover:text-stamp"
                   aria-label="Remove education"
                 >
                   <Trash2 size={13} />
@@ -556,7 +556,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
 
       {/* Skills */}
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+        <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
           Skills
         </h2>
         <p className="text-[11px] text-ink-600">Separate with commas.</p>
@@ -579,12 +579,12 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
       {/* Languages */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+          <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
             Languages
           </h2>
           <button
             onClick={addLanguage}
-            className="flex items-center gap-1 rounded-md border border-ink-700 px-2.5 py-1 text-[11px] text-paper-200 hover:border-ink-600 hover:bg-ink-800"
+            className="flex items-center gap-1 rounded-md border border-ink-700 px-2.5 py-1 text-[11px] text-stamp hover:border-stamp hover:bg-ink-800"
           >
             <Plus size={12} /> Add
           </button>
@@ -615,7 +615,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
               />
               <button
                 onClick={() => removeLanguage(lang.id)}
-                className="shrink-0 text-ink-600 hover:text-stamp-light"
+                className="shrink-0 text-ink-600 hover:text-stamp"
                 aria-label="Remove language"
               >
                 <Trash2 size={13} />
@@ -627,7 +627,7 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
 
       {/* Certifications */}
       <section className="flex flex-col gap-2">
-        <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+        <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
           Certifications / Training
         </h2>
         <p className="text-[11px] text-ink-600">
@@ -652,12 +652,12 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
       {/* References */}
       <section className="flex flex-col gap-3 pb-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-[13px] font-semibold tracking-tight text-paper-100">
+          <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
             Character references
           </h2>
           <button
             onClick={addReference}
-            className="flex items-center gap-1 rounded-md border border-ink-700 px-2.5 py-1 text-[11px] text-paper-200 hover:border-ink-600 hover:bg-ink-800"
+            className="flex items-center gap-1 rounded-md border border-ink-700 px-2.5 py-1 text-[11px] text-stamp hover:border-stamp hover:bg-ink-800"
           >
             <Plus size={12} /> Add
           </button>
@@ -673,15 +673,15 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
           {data.references.map((ref) => (
             <div
               key={ref.id}
-              className="flex flex-col gap-2 rounded-lg border border-ink-700 bg-ink-800/40 p-3"
+              className="flex flex-col gap-2 rounded-lg border border-ink-700 bg-paper-200 p-3"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-600">
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-stamp/70">
                   Reference
                 </span>
                 <button
                   onClick={() => removeReference(ref.id)}
-                  className="text-ink-600 hover:text-stamp-light"
+                  className="text-ink-600 hover:text-stamp"
                   aria-label="Remove reference"
                 >
                   <Trash2 size={13} />

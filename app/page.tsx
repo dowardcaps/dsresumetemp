@@ -53,13 +53,13 @@ export default function Home() {
   }
 
   return (
-    <main className="flex h-screen w-full flex-col bg-ink-900">
+    <main className="flex h-screen w-full flex-col bg-ink-800">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-700 px-5 py-3 print:hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-700 bg-stamp px-5 py-3 print:hidden">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setStep("gallery")}
-            className="flex items-center gap-1.5 rounded-md border border-ink-700 px-2.5 py-1.5 text-[12px] text-paper-200 hover:border-ink-600 hover:bg-ink-800"
+            className="flex items-center gap-1.5 rounded-md border border-white/30 px-2.5 py-1.5 text-[12px] text-white hover:border-white/60 hover:bg-stamp-light"
           >
             <ArrowLeft size={13} />
             Templates
@@ -69,7 +69,7 @@ export default function Home() {
               className="h-2 w-2 rounded-full"
               style={{ backgroundColor: template.accent }}
             />
-            <span className="font-display text-[13px] font-semibold text-paper-100">
+            <span className="font-display text-[13px] font-semibold text-white">
               {template.name}
             </span>
           </div>
@@ -79,7 +79,7 @@ export default function Home() {
           <select
             value={templateId}
             onChange={(e) => setTemplateId(e.target.value)}
-            className="rounded-md border border-ink-700 bg-ink-800 px-2.5 py-1.5 text-[12px] text-paper-200 outline-none"
+            className="rounded-md border border-white/30 bg-stamp-dark px-2.5 py-1.5 text-[12px] text-white outline-none"
           >
             {templates.map((t) => (
               <option key={t.id} value={t.id}>
@@ -89,7 +89,7 @@ export default function Home() {
           </select>
           <button
             onClick={handlePrintPdf}
-            className="flex items-center gap-1.5 rounded-md border border-ink-700 px-3 py-1.5 text-[12px] text-paper-200 hover:border-ink-600 hover:bg-ink-800"
+            className="flex items-center gap-1.5 rounded-md border border-white/30 px-3 py-1.5 text-[12px] text-white hover:border-white/60 hover:bg-stamp-light"
           >
             <PrinterIcon size={13} />
             Save as PDF
@@ -97,7 +97,7 @@ export default function Home() {
           <button
             onClick={handleExportDocx}
             disabled={exporting}
-            className="flex items-center gap-1.5 rounded-md bg-stamp px-3 py-1.5 text-[12px] font-semibold text-paper-100 transition-colors hover:bg-stamp-light disabled:opacity-60"
+            className="flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-[12px] font-semibold text-stamp transition-colors hover:bg-paper-300 disabled:opacity-60"
           >
             {exporting ? (
               <Loader2 size={13} className="animate-spin" />
@@ -111,14 +111,14 @@ export default function Home() {
 
       {/* Form + Preview split */}
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-        <div className="min-h-0 w-full border-b border-ink-700 md:w-[420px] md:min-w-[420px] md:border-b-0 md:border-r print:hidden">
+        <div className="min-h-0 w-full border-b border-ink-700 bg-white md:w-[420px] md:min-w-[420px] md:border-b-0 md:border-r print:hidden">
           <ResumeForm data={data} onChange={setData} />
         </div>
-        <div className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto bg-ink-950 px-6 py-8">
+        <div className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto bg-ink-900 px-6 py-8">
           <div className="w-full max-w-[560px]">
             <div className="mb-3 flex items-center gap-2 print:hidden">
-              <LayoutTemplate size={13} className="text-ink-600" />
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-600">
+              <LayoutTemplate size={13} className="text-ink-950" />
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-950">
                 Live preview
               </p>
             </div>

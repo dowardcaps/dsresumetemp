@@ -10,25 +10,25 @@ const config: Config = {
     extend: {
       colors: {
         ink: {
-          950: "#0F1218",
-          900: "#14171F",
-          800: "#1B1F29",
-          700: "#252A36",
-          600: "#333949",
+          950: "#C7D3E8",
+          900: "#EEF2F8",
+          800: "#F5F8FC",
+          700: "#D0DCF0",
+          600: "#8FA8CC",
         },
         paper: {
-          100: "#F7F8FA",
-          200: "#EDEFF3",
-          300: "#E1E4EA",
+          100: "#FFFFFF",
+          200: "#F5F8FC",
+          300: "#E3EAF5",
         },
         stamp: {
-          DEFAULT: "#D6451D",
-          light: "#F06B3D",
-          dark: "#A9350F",
+          DEFAULT: "#2B579A",
+          light: "#3B6FC4",
+          dark: "#1E3F72",
         },
         signal: {
-          DEFAULT: "#0EA5A5",
-          light: "#5EEAD4",
+          DEFAULT: "#185ABD",
+          light: "#4A90D9",
         },
       },
       fontFamily: {

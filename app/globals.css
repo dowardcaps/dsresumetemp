@@ -8,12 +8,12 @@ body {
 }
 
 body {
-  background-color: #14171f;
+  background-color: #eef2f8;
 }
 
 ::selection {
-  background-color: #d6451d;
-  color: #f7f8fa;
+  background-color: #2b579a;
+  color: #ffffff;
 }
 
 .sidebar-scroll::-webkit-scrollbar,
@@ -26,7 +26,7 @@ body {
 }
 .sidebar-scroll::-webkit-scrollbar-thumb,
 .form-scroll::-webkit-scrollbar-thumb {
-  background-color: #333949;
+  background-color: #b0c4de;
   border-radius: 999px;
 }
 
