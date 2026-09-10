@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { ResumeTemplate } from "@/lib/types";
-import { FileText, Printer } from "lucide-react";
+import { X } from "lucide-react";
 
-interface TemplateGalleryProps {
+interface TemplatePickerProps {
   templates: ResumeTemplate[];
+  selectedId: string;
   onSelect: (id: string) => void;
+  onClose: () => void;
 }
 
 function Lines({ color = "bg-paper-300" }: { color?: string }) {
@@ -207,67 +210,101 @@ function MiniPreview({ template }: { template: ResumeTemplate }) {
   );
 }
 
-export default function TemplateGallery({
+/**
+ * In-editor template picker. Rendered as a modal overlay so template
+ * selection only ever happens from inside the main editor (there is no
+ * separate template gallery / landing page anymore).
+ */
+export default function TemplatePicker({
   templates,
+  selectedId,
   onSelect,
-}: TemplateGalleryProps) {
+  onClose,
+}: TemplatePickerProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="flex h-full w-full flex-col bg-ink-800">
-      <div className="flex items-center gap-3 border-b border-ink-700 bg-stamp px-6 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-stamp">
-          <Printer size={18} strokeWidth={2.25} />
-        </div>
-        <div className="leading-tight">
-          <p className="font-display text-[15px] font-bold tracking-tight text-white">
-            DS Prints
-          </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">
-            Document Formatter
-          </p>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-6 py-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-8 flex items-center gap-2">
-            <FileText size={16} className="text-stamp" />
-            <h1 className="font-display text-[20px] font-semibold tracking-tight text-stamp-dark">
-              Choose a resume template
-            </h1>
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink-600/40 px-4 py-8 backdrop-blur-[2px] print:hidden"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={panelRef}
+        className="w-full max-w-5xl overflow-hidden rounded-xl border border-ink-700 bg-ink-800 shadow-2xl"
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-ink-700 bg-stamp px-6 py-4">
+          <div className="leading-tight">
+            <p className="font-display text-[15px] font-bold tracking-tight text-white">
+              Choose a template
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/60">
+              {templates.length} styles · applies instantly, keeps your details
+            </p>
           </div>
+          <button
+            onClick={onClose}
+            aria-label="Close template picker"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/30 text-white hover:border-white/60 hover:bg-stamp-light"
+          >
+            <X size={15} />
+          </button>
+        </div>
 
+        <div className="max-h-[75vh] overflow-y-auto px-6 py-6">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {templates.map((template) => (
-              <button
-                key={template.id}
-                onClick={() => onSelect(template.id)}
-                className="group flex flex-col overflow-hidden rounded-xl border border-ink-700 bg-white text-left shadow-sm transition-all hover:border-stamp hover:shadow-md"
-              >
-                <div className="aspect-[3/4] w-full bg-ink-900 p-4">
-                  <MiniPreview template={template} />
-                </div>
-                <div className="flex flex-col gap-1.5 border-t border-ink-700 bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-display text-[14px] font-semibold tracking-tight text-stamp-dark">
-                      {template.name}
-                    </span>
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: template.accent }}
-                    />
+            {templates.map((template) => {
+              const active = template.id === selectedId;
+              return (
+                <button
+                  key={template.id}
+                  onClick={() => {
+                    onSelect(template.id);
+                    onClose();
+                  }}
+                  className={`group flex flex-col overflow-hidden rounded-xl border bg-white text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stamp focus-visible:ring-offset-2 ${
+                    active ? "border-stamp ring-1 ring-stamp" : "border-ink-700 hover:border-stamp"
+                  }`}
+                >
+                  <div className="aspect-[3/4] w-full bg-ink-900 p-4">
+                    <MiniPreview template={template} />
                   </div>
-                  <p className="text-[12px] leading-snug text-ink-600">
-                    {template.description}
-                  </p>
-                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-stamp/70">
-                    Best for: {template.bestFor}
-                  </p>
-                </div>
-                <div className="border-t border-ink-700 bg-stamp px-4 py-2.5 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                  Use this template
-                </div>
-              </button>
-            ))}
+                  <div className="flex flex-col gap-1.5 border-t border-ink-700 bg-white p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-display text-[14px] font-semibold tracking-tight text-stamp-dark">
+                        {template.name}
+                      </span>
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: template.accent }}
+                      />
+                    </div>
+                    <p className="text-[12px] leading-snug text-ink-600">
+                      {template.description}
+                    </p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-stamp/70">
+                      Best for: {template.bestFor}
+                    </p>
+                  </div>
+                  <div
+                    className={`border-t border-ink-700 px-4 py-2.5 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-white transition-opacity ${
+                      active ? "bg-stamp opacity-100" : "bg-stamp opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+                    }`}
+                  >
+                    {active ? "Currently selected" : "Use this template"}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

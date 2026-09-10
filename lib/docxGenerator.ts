@@ -273,6 +273,7 @@ export async function generateDocx(
   if (data.photoDataUrl) {
     try {
       const imageBytes = dataUrlToUint8Array(data.photoDataUrl);
+      const photoSizePx = (data.photoSizeIn ?? 1) * 96;
       const photoCell = new TableCell({
         width: { size: 20, type: WidthType.PERCENTAGE },
         verticalAlign: VerticalAlign.CENTER,
@@ -288,7 +289,7 @@ export async function generateDocx(
             children: [
               new ImageRun({
                 data: imageBytes,
-                transformation: { width: 90, height: 90 },
+                transformation: { width: photoSizePx, height: photoSizePx },
                 type: "png",
               }),
             ],

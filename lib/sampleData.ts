@@ -80,6 +80,8 @@ export const sampleData: ResumeData = {
     weight: "",
   },
   photoDataUrl: undefined,
+  photoShape: "round",
+  photoSizeIn: 1,
 };
 
 export const emptyData: ResumeData = {
@@ -108,4 +110,6 @@ export const emptyData: ResumeData = {
     weight: "",
   },
   photoDataUrl: undefined,
+  photoShape: "round",
+  photoSizeIn: 1,
 };

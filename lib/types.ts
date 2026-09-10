@@ -60,6 +60,10 @@ export interface ResumeData {
   references: ReferenceEntry[];
   personal: PersonalInfo;
   photoDataUrl?: string;
+  /** Presentation settings for the cropped 1:1 profile image. */
+  photoShape?: "round" | "square";
+  /** Printed size in inches (square, e.g. 1, 1.5, 2, or any custom value). */
+  photoSizeIn?: number;
 }
 
 export type TemplateLayout =

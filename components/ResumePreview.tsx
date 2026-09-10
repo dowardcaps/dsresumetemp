@@ -241,19 +241,35 @@ function Photo({
   src,
   className,
   style,
+  shape = "round",
+  sizeIn = 1,
 }: {
   src?: string;
   className: string;
   style?: React.CSSProperties;
+  shape?: "round" | "square";
+  sizeIn?: number;
 }) {
   if (!src) return null;
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt="Applicant" className={className} style={style} />;
+  return (
+    <img
+      src={src}
+      alt="Applicant"
+      className={className}
+      style={{
+        ...style,
+        width: `${sizeIn}in`,
+        height: `${sizeIn}in`,
+        borderRadius: shape === "round" ? "9999px" : "0",
+      }}
+    />
+  );
 }
 
 /* --------------------------- layout renderers --------------------------- */
 
-// Image 1 — Logan Mitchell: centered header, no photo, boxed section labels
+// Image 1 — Logan Mitchell: centered header, boxed section labels, optional photo
 function CenteredClassicLayout({ data, template }: ResumePreviewProps) {
   const heading = fontClass(template.headingFont);
   const p = data.personal;
@@ -268,14 +284,22 @@ function CenteredClassicLayout({ data, template }: ResumePreviewProps) {
       id="resume-sheet"
       className="aspect-[8.5/11] w-full overflow-hidden bg-white p-8 text-neutral-900 shadow-2xl"
     >
-      <div className="text-center">
-        <p className={`${heading} text-[16px] font-bold`}>
-          {data.fullName || "Your Name"}
-          {data.title ? `, ${data.title}` : ""}
-        </p>
-        <ContactLine
-          data={data}
-          className="mt-1 text-[10px] text-neutral-500"
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 text-center">
+          <p className={`${heading} text-[16px] font-bold`}>
+            {data.fullName || "Your Name"}
+            {data.title ? `, ${data.title}` : ""}
+          </p>
+          <ContactLine
+            data={data}
+            className="mt-1 text-[10px] text-neutral-500"
+          />
+        </div>
+        <Photo
+          src={data.photoDataUrl}
+          shape={data.photoShape ?? "round"}
+          sizeIn={data.photoSizeIn ?? 1}
+          className="h-16 w-16 shrink-0 rounded-md object-cover"
         />
       </div>
 
@@ -321,18 +345,28 @@ function CenteredClassicLayout({ data, template }: ResumePreviewProps) {
   );
 }
 
-// Image 2 — Tiffany Giroux: gray bar headers, diamond bullets, no photo
+// Image 2 — Tiffany Giroux: gray bar headers, diamond bullets, optional photo
 function BannerHeadersLayout({ data, template }: ResumePreviewProps) {
   return (
     <div
       id="resume-sheet"
       className="aspect-[8.5/11] w-full overflow-hidden bg-white p-8 text-neutral-900 shadow-2xl"
     >
-      <p className="font-body text-[19px] font-bold tracking-tight">
-        {data.fullName || "Your Name"}
-      </p>
-      {data.title && <p className="text-[12px] text-neutral-600">{data.title}</p>}
-      <ContactLine data={data} className="mt-1.5 text-[10.5px] text-neutral-500" />
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <p className="font-body text-[19px] font-bold tracking-tight">
+            {data.fullName || "Your Name"}
+          </p>
+          {data.title && <p className="text-[12px] text-neutral-600">{data.title}</p>}
+          <ContactLine data={data} className="mt-1.5 text-[10.5px] text-neutral-500" />
+        </div>
+        <Photo
+          src={data.photoDataUrl}
+          shape={data.photoShape ?? "round"}
+          sizeIn={data.photoSizeIn ?? 1}
+          className="h-16 w-16 shrink-0 rounded-md object-cover"
+        />
+      </div>
 
       <div className="mt-4">
         {data.summary && (
@@ -399,6 +433,8 @@ function SidebarLeftDarkLayout({ data, template }: ResumePreviewProps) {
       >
         <Photo
           src={data.photoDataUrl}
+          shape={data.photoShape ?? "round"}
+          sizeIn={data.photoSizeIn ?? 1}
           className="h-16 w-16 self-start rounded-full border-2 border-white/70 object-cover"
         />
         <div>
@@ -501,6 +537,8 @@ function PhotoTopHeaderLayout({ data, template }: ResumePreviewProps) {
         </div>
         <Photo
           src={data.photoDataUrl}
+          shape={data.photoShape ?? "round"}
+          sizeIn={data.photoSizeIn ?? 1}
           className="h-16 w-16 shrink-0 rounded-md object-cover"
         />
       </div>
@@ -563,6 +601,8 @@ function SidebarRightDarkLayout({ data, template }: ResumePreviewProps) {
       <div className="flex-1 overflow-hidden p-5">
         <Photo
           src={data.photoDataUrl}
+          shape={data.photoShape ?? "round"}
+          sizeIn={data.photoSizeIn ?? 1}
           className="mb-3 h-14 w-14 rounded-full object-cover"
         />
         <p className="font-body text-[17px] font-bold leading-tight">
@@ -650,18 +690,27 @@ function SidebarRightDarkLayout({ data, template }: ResumePreviewProps) {
   );
 }
 
-// Image 6 — Kane Jones: sage header block, minimal single column
+// Image 6 — Kane Jones: sage header block, minimal single column, optional photo
 function BlockHeaderSingleLayout({ data, template }: ResumePreviewProps) {
   return (
     <div
       id="resume-sheet"
       className="aspect-[8.5/11] w-full overflow-hidden bg-white text-neutral-900 shadow-2xl"
     >
-      <div className="px-7 py-6" style={{ backgroundColor: template.accentSoft }}>
-        <p className="font-body text-[18px] font-bold tracking-tight" style={{ color: "#2B2B2B" }}>
-          {data.fullName || "Your Name"}
-        </p>
-        <ContactLine data={data} className="mt-1 text-[10px] text-neutral-600" />
+      <div className="flex items-start justify-between gap-4 px-7 py-6" style={{ backgroundColor: template.accentSoft }}>
+        <div className="flex-1">
+          <p className="font-body text-[18px] font-bold tracking-tight" style={{ color: "#2B2B2B" }}>
+            {data.fullName || "Your Name"}
+          </p>
+          <ContactLine data={data} className="mt-1 text-[10px] text-neutral-600" />
+        </div>
+        <Photo
+          src={data.photoDataUrl}
+          shape={data.photoShape ?? "round"}
+          sizeIn={data.photoSizeIn ?? 1}
+          className="h-16 w-16 shrink-0 rounded-md object-cover"
+          style={{ border: `2px solid ${template.accent}` }}
+        />
       </div>
       <div className="px-7 py-5">
         {data.title && (
@@ -713,6 +762,8 @@ function SidebarRightLightLayout({ data, template }: ResumePreviewProps) {
         <div className="mb-3 flex items-center gap-3">
           <Photo
             src={data.photoDataUrl}
+            shape={data.photoShape ?? "round"}
+            sizeIn={data.photoSizeIn ?? 1}
             className="h-12 w-12 rounded-full object-cover"
           />
           <div>
@@ -811,6 +862,8 @@ function BlockPhotoHeaderLayout({ data, template }: ResumePreviewProps) {
       <div className="flex items-start justify-between gap-4">
         <Photo
           src={data.photoDataUrl}
+          shape={data.photoShape ?? "round"}
+          sizeIn={data.photoSizeIn ?? 1}
           className="h-16 w-16 shrink-0 rounded-md object-cover"
           style={{ border: `2px solid ${template.accent}` }}
         />
@@ -905,6 +958,8 @@ function FormalPhLayout({ data, template }: ResumePreviewProps) {
         >
           <Photo
             src={data.photoDataUrl}
+            shape={data.photoShape ?? "round"}
+            sizeIn={data.photoSizeIn ?? 1}
             className="aspect-[3/4] w-full rounded-sm object-cover"
             style={{ border: `2px solid ${template.accent}` }}
           />

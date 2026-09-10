@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, Dispatch, SetStateAction } from "react";
 import {
   ResumeData,
   ExperienceEntry,
@@ -8,12 +9,13 @@ import {
   ReferenceEntry,
   PersonalInfo,
 } from "@/lib/types";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ClipboardPaste, ChevronDown, ChevronUp, Check } from "lucide-react";
 import PhotoCropper from "./PhotoCropper";
+import { parseResumeText, ParsedResume } from "@/lib/parseResumeText";
 
 interface ResumeFormProps {
   data: ResumeData;
-  onChange: (data: ResumeData) => void;
+  onChange: Dispatch<SetStateAction<ResumeData>>;
 }
 
 const inputClass =
@@ -26,8 +28,19 @@ function newId(prefix: string) {
 }
 
 export default function ResumeForm({ data, onChange }: ResumeFormProps) {
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importResult, setImportResult] = useState<ParsedResume["foundCounts"] | null>(null);
+
   const update = <K extends keyof ResumeData>(key: K, value: ResumeData[K]) =>
-    onChange({ ...data, [key]: value });
+    onChange((prev) => ({ ...prev, [key]: value }));
+
+  const handleImport = () => {
+    if (!importText.trim()) return;
+    const parsed = parseResumeText(importText);
+    onChange((prev) => ({ ...prev, ...parsed.data }));
+    setImportResult(parsed.foundCounts);
+  };
 
   // --- Personal info (birth date, civil status, etc.) ---
   const updatePersonal = <K extends keyof PersonalInfo>(
@@ -155,18 +168,85 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
 
   return (
     <div className="form-scroll flex h-full flex-col gap-6 overflow-y-auto px-5 py-5">
+      {/* Paste-to-fill import */}
+      <section className="flex flex-col gap-2 rounded-lg border border-ink-700 bg-paper-200 p-3">
+        <button
+          onClick={() => setImportOpen((v) => !v)}
+          className="flex w-full items-center justify-between gap-2"
+        >
+          <span className="flex items-center gap-1.5 font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
+            <ClipboardPaste size={14} className="text-stamp" />
+            Paste an existing resume
+          </span>
+          {importOpen ? (
+            <ChevronUp size={14} className="text-stamp" />
+          ) : (
+            <ChevronDown size={14} className="text-stamp" />
+          )}
+        </button>
+
+        {importOpen && (
+          <div className="flex flex-col gap-2 pt-1">
+            <p className="text-[11px] text-ink-600">
+              Paste the text of a resume you already have (or text copied from a
+              scanned PDF) and we'll try to fill in the fields below for you.
+              Review everything afterward — this is a starting point, not final.
+            </p>
+            <textarea
+              className={`${inputClass} min-h-[110px] resize-y`}
+              value={importText}
+              onChange={(e) => {
+                setImportText(e.target.value);
+                setImportResult(null);
+              }}
+              placeholder="Paste resume text here..."
+            />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleImport}
+                disabled={!importText.trim()}
+                className="flex items-center gap-1.5 rounded-md bg-stamp px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-stamp-light disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ClipboardPaste size={12} />
+                Auto-fill fields
+              </button>
+              {importResult && (
+                <span className="flex items-center gap-1 text-[11px] text-stamp">
+                  <Check size={12} />
+                  Filled in{" "}
+                  {[
+                    importResult.name && "name",
+                    importResult.email && "email",
+                    importResult.phone && "phone",
+                    importResult.experience > 0 && `${importResult.experience} job${importResult.experience > 1 ? "s" : ""}`,
+                    importResult.education > 0 && `${importResult.education} school${importResult.education > 1 ? "s" : ""}`,
+                    importResult.skills > 0 && "skills",
+                  ]
+                    .filter(Boolean)
+                    .join(", ") || "a few fields"}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* ID photo */}
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
           ID photo
         </h2>
         <p className="text-[11px] text-ink-600">
-          Upload a photo and drag/zoom to frame it. Attach it to the resume
-          to show it in the preview and DOCX export.
+          Upload a photo, drag and zoom to frame it, then choose the shape and
+          exact printed size for your resume.
         </p>
         <PhotoCropper
           photoDataUrl={data.photoDataUrl}
+          photoShape={data.photoShape ?? "round"}
+          photoSizeIn={data.photoSizeIn ?? 1}
           onPhotoChange={(url) => update("photoDataUrl", url)}
+          onPhotoShapeChange={(shape) => update("photoShape", shape)}
+          onPhotoSizeChange={(size) => update("photoSizeIn", size)}
         />
       </section>
 

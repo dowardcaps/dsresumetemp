@@ -63,7 +63,8 @@ export function exportCrop(
   img: HTMLImageElement,
   box: number,
   crop: CropState,
-  targetPx: number
+  targetPx: number,
+  shape: "round" | "square" = "square"
 ): string {
   const canvas = document.createElement("canvas");
   canvas.width = targetPx;
@@ -80,6 +81,11 @@ export function exportCrop(
 
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
+  if (shape === "round") {
+    ctx.beginPath();
+    ctx.arc(targetPx / 2, targetPx / 2, targetPx / 2, 0, Math.PI * 2);
+    ctx.clip();
+  }
   ctx.drawImage(
     img,
     crop.pos.x * scaleUp,

@@ -2,32 +2,27 @@
 
 import { useState } from "react";
 import { templates, getTemplate } from "@/lib/templates";
-import { sampleData } from "@/lib/sampleData";
+import { sampleData, emptyData } from "@/lib/sampleData";
 import { ResumeData } from "@/lib/types";
-import TemplateGallery from "@/components/TemplateGallery";
+import TemplatePicker from "@/components/TemplatePicker";
 import ResumeForm from "@/components/ResumeForm";
 import ResumePreview from "@/components/ResumePreview";
 import { generateDocx, downloadBlob } from "@/lib/docxGenerator";
 import {
-  ArrowLeft,
   LayoutTemplate,
   Download,
   Printer as PrinterIcon,
   Loader2,
+  RotateCcw,
 } from "lucide-react";
 
 export default function Home() {
-  const [step, setStep] = useState<"gallery" | "edit">("gallery");
   const [templateId, setTemplateId] = useState(templates[0].id);
   const [data, setData] = useState<ResumeData>(sampleData);
   const [exporting, setExporting] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const template = getTemplate(templateId);
-
-  const handleSelectTemplate = (id: string) => {
-    setTemplateId(id);
-    setStep("edit");
-  };
 
   const handleExportDocx = async () => {
     setExporting(true);
@@ -44,13 +39,15 @@ export default function Home() {
     window.print();
   };
 
-  if (step === "gallery") {
-    return (
-      <main className="h-screen w-full">
-        <TemplateGallery templates={templates} onSelect={handleSelectTemplate} />
-      </main>
-    );
-  }
+  const handleStartBlank = () => {
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm("Clear all fields and start a blank resume? This can't be undone.")
+    ) {
+      return;
+    }
+    setData({ ...emptyData });
+  };
 
   return (
     <main className="flex h-screen w-full flex-col bg-ink-800">
@@ -58,35 +55,26 @@ export default function Home() {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-700 bg-stamp px-5 py-3 print:hidden">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setStep("gallery")}
+            onClick={() => setPickerOpen(true)}
             className="flex items-center gap-1.5 rounded-md border border-white/30 px-2.5 py-1.5 text-[12px] text-white hover:border-white/60 hover:bg-stamp-light"
           >
-            <ArrowLeft size={13} />
-            Templates
-          </button>
-          <div className="hidden items-center gap-2 sm:flex">
+            <LayoutTemplate size={13} />
             <span
               className="h-2 w-2 rounded-full"
               style={{ backgroundColor: template.accent }}
             />
-            <span className="font-display text-[13px] font-semibold text-white">
-              {template.name}
-            </span>
-          </div>
+            {template.name}
+          </button>
+          <button
+            onClick={handleStartBlank}
+            className="flex items-center gap-1.5 rounded-md border border-white/30 px-2.5 py-1.5 text-[12px] text-white hover:border-white/60 hover:bg-stamp-light"
+          >
+            <RotateCcw size={13} />
+            New / Clear
+          </button>
         </div>
 
         <div className="flex items-center gap-2">
-          <select
-            value={templateId}
-            onChange={(e) => setTemplateId(e.target.value)}
-            className="rounded-md border border-white/30 bg-stamp-dark px-2.5 py-1.5 text-[12px] text-white outline-none"
-          >
-            {templates.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
           <button
             onClick={handlePrintPdf}
             className="flex items-center gap-1.5 rounded-md border border-white/30 px-3 py-1.5 text-[12px] text-white hover:border-white/60 hover:bg-stamp-light"
@@ -117,8 +105,8 @@ export default function Home() {
         <div className="flex min-h-0 flex-1 items-start justify-center overflow-y-auto bg-ink-900 px-6 py-8">
           <div className="w-full max-w-[560px]">
             <div className="mb-3 flex items-center gap-2 print:hidden">
-              <LayoutTemplate size={13} className="text-ink-950" />
-              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-950">
+              <LayoutTemplate size={13} className="text-stamp/70" />
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-stamp/70">
                 Live preview
               </p>
             </div>
@@ -126,6 +114,15 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {pickerOpen && (
+        <TemplatePicker
+          templates={templates}
+          selectedId={templateId}
+          onSelect={setTemplateId}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </main>
   );
 }
