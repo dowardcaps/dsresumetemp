@@ -64,6 +64,8 @@ export interface ResumeData {
   photoShape?: "round" | "square";
   /** Printed size in inches (square, e.g. 1, 1.5, 2, or any custom value). */
   photoSizeIn?: number;
+  /** Custom accent color (hex) overriding the selected template's default. */
+  accentColor?: string;
 }
 
 export type TemplateLayout =

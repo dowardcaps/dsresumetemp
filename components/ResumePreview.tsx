@@ -340,6 +340,16 @@ function CenteredClassicLayout({ data, template }: ResumePreviewProps) {
             <LanguagesInline data={data} />
           </BarSection>
         )}
+        {data.certifications.length > 0 && (
+          <BarSection title="Certifications" bg="#F1F1F3" fg="#1B1F29">
+            <p className="text-[11px] text-neutral-700">{data.certifications.join("   •   ")}</p>
+          </BarSection>
+        )}
+        {data.references.length > 0 && (
+          <BarSection title="References" bg="#F1F1F3" fg="#1B1F29">
+            <ReferencesBlock data={data} />
+          </BarSection>
+        )}
       </div>
     </div>
   );
@@ -415,6 +425,16 @@ function BannerHeadersLayout({ data, template }: ResumePreviewProps) {
             <LanguagesInline data={data} />
           </BarSection>
         )}
+        {data.certifications.length > 0 && (
+          <BarSection title="Certifications" bg={template.accentSoft} fg={template.accent}>
+            <p className="text-[11px] text-neutral-700">{data.certifications.join("   •   ")}</p>
+          </BarSection>
+        )}
+        {data.references.length > 0 && (
+          <BarSection title="References" bg={template.accentSoft} fg={template.accent}>
+            <ReferencesBlock data={data} />
+          </BarSection>
+        )}
       </div>
     </div>
   );
@@ -482,6 +502,21 @@ function SidebarLeftDarkLayout({ data, template }: ResumePreviewProps) {
               {data.languages.map((l) => (
                 <li key={l.id} className="text-[10px] text-white/85">
                   {l.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {data.certifications.length > 0 && (
+          <div>
+            <h3 className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/90">
+              Certifications
+            </h3>
+            <ul className="flex flex-col gap-0.5">
+              {data.certifications.map((c, i) => (
+                <li key={i} className="text-[10px] text-white/85">
+                  {c}
                 </li>
               ))}
             </ul>
@@ -586,6 +621,11 @@ function PhotoTopHeaderLayout({ data, template }: ResumePreviewProps) {
             )}
           </RuleSection>
         )}
+        {data.references.length > 0 && (
+          <RuleSection title="References" accent={template.accent}>
+            <ReferencesBlock data={data} />
+          </RuleSection>
+        )}
       </div>
     </div>
   );
@@ -685,6 +725,20 @@ function SidebarRightDarkLayout({ data, template }: ResumePreviewProps) {
             </ul>
           </div>
         )}
+        {data.certifications.length > 0 && (
+          <div>
+            <h3 className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/90">
+              Certifications
+            </h3>
+            <ul className="flex flex-col gap-0.5">
+              {data.certifications.map((c, i) => (
+                <li key={i} className="text-[10px] text-white/85">
+                  {c}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -739,6 +793,11 @@ function BlockHeaderSingleLayout({ data, template }: ResumePreviewProps) {
         {data.skills.length > 0 && (
           <RuleSection title="Skills" accent={template.accent}>
             <p className="text-[11px] text-neutral-700">{data.skills.join("   •   ")}</p>
+          </RuleSection>
+        )}
+        {data.certifications.length > 0 && (
+          <RuleSection title="Certifications" accent={template.accent}>
+            <p className="text-[11px] text-neutral-700">{data.certifications.join("   •   ")}</p>
           </RuleSection>
         )}
         {data.references.length > 0 && (
@@ -847,6 +906,23 @@ function SidebarRightLightLayout({ data, template }: ResumePreviewProps) {
             </ul>
           </div>
         )}
+        {data.certifications.length > 0 && (
+          <div>
+            <h3
+              className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.14em]"
+              style={{ color: template.accent }}
+            >
+              Certifications
+            </h3>
+            <ul className="flex flex-col gap-1">
+              {data.certifications.map((c, i) => (
+                <li key={i} className="text-[10px] text-neutral-700">
+                  {c}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -911,6 +987,20 @@ function BlockPhotoHeaderLayout({ data, template }: ResumePreviewProps) {
                   <li key={i} className="flex items-center justify-between gap-2">
                     <span className="text-[9.5px] text-neutral-700">{s}</span>
                     <SkillDots color={template.accent} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {data.certifications.length > 0 && (
+            <div className="mb-3">
+              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-700">
+                Certifications
+              </p>
+              <ul className="flex flex-col gap-0.5">
+                {data.certifications.map((c, i) => (
+                  <li key={i} className="text-[9.5px] text-neutral-700">
+                    {c}
                   </li>
                 ))}
               </ul>

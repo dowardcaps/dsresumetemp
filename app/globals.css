@@ -36,12 +36,26 @@ body {
     size: 8.5in 11in;
     margin: 0;
   }
+  html,
+  body {
+    /* Chrome/Edge/Firefox all drop background colors and images in
+       print/PDF output by default. Every template relies on background
+       colors (sidebar fills, section bars, accent tints), so without
+       this the printed/PDF output looks nothing like the on-screen
+       preview — flat white instead of colored. Force it exactly. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
   body * {
     visibility: hidden;
   }
   #resume-sheet,
   #resume-sheet * {
     visibility: visible;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
   }
   #resume-sheet {
     position: absolute;

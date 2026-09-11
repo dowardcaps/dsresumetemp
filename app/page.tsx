@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { templates, getTemplate } from "@/lib/templates";
 import { sampleData, emptyData } from "@/lib/sampleData";
-import { ResumeData } from "@/lib/types";
+import { ResumeData, ResumeTemplate } from "@/lib/types";
+import { tintHex } from "@/lib/color";
 import TemplatePicker from "@/components/TemplatePicker";
+import ThemeColorPicker from "@/components/ThemeColorPicker";
 import ResumeForm from "@/components/ResumeForm";
 import ResumePreview from "@/components/ResumePreview";
 import { generateDocx, downloadBlob } from "@/lib/docxGenerator";
@@ -14,6 +16,7 @@ import {
   Printer as PrinterIcon,
   Loader2,
   RotateCcw,
+  Palette,
 } from "lucide-react";
 
 export default function Home() {
@@ -21,13 +24,32 @@ export default function Home() {
   const [data, setData] = useState<ResumeData>(sampleData);
   const [exporting, setExporting] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
   const template = getTemplate(templateId);
+
+  // A user-picked accent color overrides the template's built-in accent.
+  // We only derive the soft tint automatically, so the picker only needs
+  // one control.
+  const activeTemplate: ResumeTemplate = data.accentColor
+    ? {
+        ...template,
+        accent: data.accentColor,
+        accentSoft: tintHex(data.accentColor, 0.85),
+      }
+    : template;
+
+  const handleSelectTemplate = (id: string) => {
+    setTemplateId(id);
+    // A custom color was picked for the previous template's palette —
+    // clear it so the newly chosen template shows its own default look.
+    setData((prev) => ({ ...prev, accentColor: undefined }));
+  };
 
   const handleExportDocx = async () => {
     setExporting(true);
     try {
-      const blob = await generateDocx(data, template);
+      const blob = await generateDocx(data, activeTemplate);
       const filename = `${(data.fullName || "resume").replace(/\s+/g, "_")}_${template.id}.docx`;
       downloadBlob(blob, filename);
     } finally {
@@ -61,9 +83,20 @@ export default function Home() {
             <LayoutTemplate size={13} />
             <span
               className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: template.accent }}
+              style={{ backgroundColor: activeTemplate.accent }}
             />
             {template.name}
+          </button>
+          <button
+            onClick={() => setColorPickerOpen(true)}
+            className="flex items-center gap-1.5 rounded-md border border-white/30 px-2.5 py-1.5 text-[12px] text-white hover:border-white/60 hover:bg-stamp-light"
+          >
+            <Palette size={13} />
+            <span
+              className="h-3.5 w-3.5 rounded-full border border-white/50"
+              style={{ backgroundColor: activeTemplate.accent }}
+            />
+            Color
           </button>
           <button
             onClick={handleStartBlank}
@@ -110,7 +143,7 @@ export default function Home() {
                 Live preview
               </p>
             </div>
-            <ResumePreview data={data} template={template} />
+            <ResumePreview data={data} template={activeTemplate} />
           </div>
         </div>
       </div>
@@ -119,8 +152,19 @@ export default function Home() {
         <TemplatePicker
           templates={templates}
           selectedId={templateId}
-          onSelect={setTemplateId}
+          onSelect={handleSelectTemplate}
           onClose={() => setPickerOpen(false)}
+        />
+      )}
+
+      {colorPickerOpen && (
+        <ThemeColorPicker
+          color={activeTemplate.accent}
+          defaultColor={template.accent}
+          isCustom={Boolean(data.accentColor)}
+          onChange={(hex) => setData((prev) => ({ ...prev, accentColor: hex }))}
+          onReset={() => setData((prev) => ({ ...prev, accentColor: undefined }))}
+          onClose={() => setColorPickerOpen(false)}
         />
       )}
     </main>
