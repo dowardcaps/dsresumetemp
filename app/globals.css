@@ -30,12 +30,11 @@ body {
   border-radius: 999px;
 }
 
-/* Print / Save-as-PDF: show only the resume sheet at full page size */
+/* Print / Save-as-PDF: show only the resume sheet at full page size.
+   The @page size and #resume-sheet width/height are set dynamically
+   per the user's chosen paper size via an inline <style> tag in
+   app/page.tsx — this block only handles the parts that don't vary. */
 @media print {
-  @page {
-    size: 8.5in 11in;
-    margin: 0;
-  }
   html,
   body {
     /* Chrome/Edge/Firefox all drop background colors and images in
@@ -61,8 +60,6 @@ body {
     position: absolute;
     left: 0;
     top: 0;
-    width: 8.5in;
-    min-height: 11in;
     margin: 0;
     box-shadow: none !important;
     border-radius: 0 !important;

@@ -12,9 +12,13 @@ import {
   WidthType,
   VerticalAlign,
   ImageRun,
+  convertInchesToTwip,
 } from "docx";
 import { ResumeData, ResumeTemplate } from "./types";
 import { dataUrlToUint8Array } from "./imageUtils";
+import { PaperSize, paperSizes } from "./paperSizes";
+import { FontOption, fonts } from "./fonts";
+import { FontSizeOption, fontSizes as fontSizeOptions } from "./fontSizes";
 
 const hex = (h: string) => h.replace("#", "").toUpperCase();
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" } as const;
@@ -24,6 +28,19 @@ const NO_CELL_BORDERS = {
   left: NO_BORDER,
   right: NO_BORDER,
 };
+
+// The selected font + size scale for the export currently in progress.
+// Set once at the top of generateDocx and read by every builder function
+// below it — simpler than threading the same two values through every
+// helper in this file, and safe because a single export always runs to
+// completion synchronously before another one can start.
+let DOCX_FONT = "Calibri";
+let DOCX_SCALE = 1;
+
+/** Scales a half-point font size by the user's chosen size scale. */
+function sz(halfPoints: number): number {
+  return Math.round(halfPoints * DOCX_SCALE);
+}
 
 function contactLine(data: ResumeData, separator = "   |   "): string {
   return [data.email, data.phone, data.location, data.links]
@@ -41,9 +58,9 @@ function barHeading(text: string, bgHex: string, fgHex: string): Paragraph {
       new TextRun({
         text: text.toUpperCase(),
         bold: true,
-        size: 18,
+        size: sz(18),
         color: hex(fgHex),
-        font: "Calibri",
+        font: DOCX_FONT,
         characterSpacing: 20,
       }),
     ],
@@ -62,9 +79,9 @@ function ruleHeading(text: string, accent: string): Paragraph {
       new TextRun({
         text: text.toUpperCase(),
         bold: true,
-        size: 18,
+        size: sz(18),
         color: hex(accent),
-        font: "Calibri",
+        font: DOCX_FONT,
         characterSpacing: 16,
       }),
     ],
@@ -79,9 +96,9 @@ function sidebarHeading(text: string): Paragraph {
       new TextRun({
         text: text.toUpperCase(),
         bold: true,
-        size: 16,
+        size: sz(16),
         color: "FFFFFF",
-        font: "Calibri",
+        font: DOCX_FONT,
         characterSpacing: 14,
       }),
     ],
@@ -91,7 +108,7 @@ function sidebarHeading(text: string): Paragraph {
 function textParagraph(text: string, opts: { color?: string; size?: number; after?: number } = {}) {
   return new Paragraph({
     spacing: { after: opts.after ?? 100 },
-    children: [new TextRun({ text, size: opts.size ?? 21, color: opts.color })],
+    children: [new TextRun({ text, size: sz(opts.size ?? 21), color: opts.color, font: DOCX_FONT })],
   });
 }
 
@@ -123,10 +140,10 @@ function experienceParagraphs(data: ResumeData, opts: { color?: string } = {}): 
       new Paragraph({
         spacing: { before: 120 },
         children: [
-          new TextRun({ text: exp.role || "Role", bold: true, size: 22, color: opts.color }),
+          new TextRun({ text: exp.role || "Role", bold: true, size: sz(22), color: opts.color }),
           new TextRun({
             text: `  —  ${exp.company || "Company"}${exp.location ? ", " + exp.location : ""}`,
-            size: 21,
+            size: sz(21),
             color: opts.color,
           }),
         ],
@@ -139,7 +156,7 @@ function experienceParagraphs(data: ResumeData, opts: { color?: string } = {}): 
           new TextRun({
             text: `${exp.startDate} – ${exp.current ? "Present" : exp.endDate}`,
             italics: true,
-            size: 19,
+            size: sz(19),
             color: "6B7280",
           }),
         ],
@@ -152,7 +169,7 @@ function experienceParagraphs(data: ResumeData, opts: { color?: string } = {}): 
           new Paragraph({
             bullet: { level: 0 },
             spacing: { after: 60 },
-            children: [new TextRun({ text: b, size: 21, color: opts.color })],
+            children: [new TextRun({ text: b, size: sz(21), color: opts.color })],
           })
         )
       );
@@ -167,10 +184,10 @@ function educationParagraphs(data: ResumeData, opts: { color?: string } = {}): P
       new Paragraph({
         spacing: { before: 80 },
         children: [
-          new TextRun({ text: edu.degree || "Degree", bold: true, size: 22, color: opts.color }),
+          new TextRun({ text: edu.degree || "Degree", bold: true, size: sz(22), color: opts.color }),
           new TextRun({
             text: `  —  ${edu.school || "School"}${edu.location ? ", " + edu.location : ""}`,
-            size: 21,
+            size: sz(21),
             color: opts.color,
           }),
         ],
@@ -183,7 +200,7 @@ function educationParagraphs(data: ResumeData, opts: { color?: string } = {}): P
           new TextRun({
             text: `${edu.startDate} – ${edu.endDate}`,
             italics: true,
-            size: 19,
+            size: sz(19),
             color: "6B7280",
           }),
         ],
@@ -199,13 +216,13 @@ function referencesParagraphs(data: ResumeData): Paragraph[] {
     out.push(
       new Paragraph({
         spacing: { before: 60 },
-        children: [new TextRun({ text: r.name || "Reference", bold: true, size: 21 })],
+        children: [new TextRun({ text: r.name || "Reference", bold: true, size: sz(21) })],
       })
     );
     if (r.relation) {
       out.push(
         new Paragraph({
-          children: [new TextRun({ text: r.relation, size: 20, color: "6B7280" })],
+          children: [new TextRun({ text: r.relation, size: sz(20), color: "6B7280" })],
         })
       );
     }
@@ -214,7 +231,7 @@ function referencesParagraphs(data: ResumeData): Paragraph[] {
       out.push(
         new Paragraph({
           spacing: { after: 60 },
-          children: [new TextRun({ text: contact, size: 20, color: "6B7280" })],
+          children: [new TextRun({ text: contact, size: sz(20), color: "6B7280" })],
         })
       );
     }
@@ -243,14 +260,14 @@ function buildAtsClassicBody(data: ResumeData): (Paragraph | Table)[] {
         new TextRun({
           text: [data.fullName || "Your Name", data.title].filter(Boolean).join(", "),
           bold: true,
-          size: 32,
+          size: sz(32),
         }),
       ],
     }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
-      children: [new TextRun({ text: contactLine(data), size: 19, color: "6B7280" })],
+      children: [new TextRun({ text: contactLine(data), size: sz(19), color: "6B7280" })],
     }),
   ];
 
@@ -307,8 +324,8 @@ function buildAtsClassicBody(data: ResumeData): (Paragraph | Table)[] {
           spacing: { after: 30 },
           border: { bottom: { color: "E5E7EB", space: 4, style: BorderStyle.SINGLE, size: 4 } },
           children: [
-            new TextRun({ text: `${label}: `, bold: true, size: 19, color: "6B7280" }),
-            new TextRun({ text: value, size: 19, color: "1B1F29" }),
+            new TextRun({ text: `${label}: `, bold: true, size: sz(19), color: "6B7280" }),
+            new TextRun({ text: value, size: sz(19), color: "1B1F29" }),
           ],
         })
       );
@@ -365,19 +382,19 @@ function buildCleanListBody(data: ResumeData, template: ResumeTemplate): (Paragr
   const headerParas = [
     new Paragraph({
       spacing: { after: 40 },
-      children: [new TextRun({ text: data.fullName || "Your Name", bold: true, size: 30 })],
+      children: [new TextRun({ text: data.fullName || "Your Name", bold: true, size: sz(30) })],
     }),
     ...(data.title
       ? [
           new Paragraph({
             spacing: { after: 40 },
-            children: [new TextRun({ text: data.title, size: 22, color: "525252" })],
+            children: [new TextRun({ text: data.title, size: sz(22), color: "525252" })],
           }),
         ]
       : []),
     new Paragraph({
       spacing: { after: 100 },
-      children: [new TextRun({ text: contactLine(data), size: 19, color: "6B7280" })],
+      children: [new TextRun({ text: contactLine(data), size: sz(19), color: "6B7280" })],
     }),
   ];
 
@@ -430,8 +447,8 @@ function buildCleanListBody(data: ResumeData, template: ResumeTemplate): (Paragr
         new Paragraph({
           spacing: { before: 100 },
           children: [
-            new TextRun({ text: "⬥ ", bold: true, size: 22 }),
-            new TextRun({ text: `${exp.role || "Role"} — ${exp.company || "Company"}`, bold: true, size: 22 }),
+            new TextRun({ text: "⬥ ", bold: true, size: sz(22) }),
+            new TextRun({ text: `${exp.role || "Role"} — ${exp.company || "Company"}`, bold: true, size: sz(22) }),
           ],
         })
       );
@@ -440,7 +457,7 @@ function buildCleanListBody(data: ResumeData, template: ResumeTemplate): (Paragr
           children: [
             new TextRun({
               text: `${exp.startDate} - ${exp.current ? "Current" : exp.endDate}`,
-              size: 19,
+              size: sz(19),
               color: "6B7280",
             }),
           ],
@@ -448,7 +465,7 @@ function buildCleanListBody(data: ResumeData, template: ResumeTemplate): (Paragr
       );
       const bullets = exp.bullets.filter(Boolean).join(" ");
       if (bullets) {
-        out.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: bullets, size: 21 })] }));
+        out.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: bullets, size: sz(21) })] }));
       }
     });
   }
@@ -459,9 +476,9 @@ function buildCleanListBody(data: ResumeData, template: ResumeTemplate): (Paragr
         new Paragraph({
           spacing: { after: 60 },
           children: [
-            new TextRun({ text: "⬥ ", bold: true, size: 21 }),
-            new TextRun({ text: `${edu.degree || "Degree"}, ${edu.school || "School"}`, bold: true, size: 21 }),
-            new TextRun({ text: `    ${edu.startDate} - ${edu.endDate}`, size: 19, color: "6B7280" }),
+            new TextRun({ text: "⬥ ", bold: true, size: sz(21) }),
+            new TextRun({ text: `${edu.degree || "Degree"}, ${edu.school || "School"}`, bold: true, size: sz(21) }),
+            new TextRun({ text: `    ${edu.startDate} - ${edu.endDate}`, size: sz(19), color: "6B7280" }),
           ],
         })
       );
@@ -504,7 +521,7 @@ function buildSidebarBody(data: ResumeData, template: ResumeTemplate): (Paragrap
   sidebarChildren.push(
     new Paragraph({
       spacing: { after: 20 },
-      children: [new TextRun({ text: data.fullName || "Your Name", bold: true, size: 26, color: "FFFFFF" })],
+      children: [new TextRun({ text: data.fullName || "Your Name", bold: true, size: sz(26), color: "FFFFFF" })],
     })
   );
   if (data.title) {
@@ -512,7 +529,7 @@ function buildSidebarBody(data: ResumeData, template: ResumeTemplate): (Paragrap
       new Paragraph({
         spacing: { after: 100 },
         children: [
-          new TextRun({ text: data.title.toUpperCase(), size: 16, color: "F0F0F0", characterSpacing: 12 }),
+          new TextRun({ text: data.title.toUpperCase(), size: sz(16), color: "F0F0F0", characterSpacing: 12 }),
         ],
       })
     );
@@ -524,7 +541,7 @@ function buildSidebarBody(data: ResumeData, template: ResumeTemplate): (Paragrap
       sidebarChildren.push(
         new Paragraph({
           spacing: { after: 30 },
-          children: [new TextRun({ text: v as string, size: 17, color: "FFFFFF" })],
+          children: [new TextRun({ text: v as string, size: sz(17), color: "FFFFFF" })],
         })
       );
     });
@@ -537,7 +554,7 @@ function buildSidebarBody(data: ResumeData, template: ResumeTemplate): (Paragrap
         new Paragraph({
           spacing: { after: 40 },
           border: { bottom: { color: "E0E0E0", space: 2, style: BorderStyle.SINGLE, size: 2 } },
-          children: [new TextRun({ text: s, size: 17, color: "FFFFFF" })],
+          children: [new TextRun({ text: s, size: sz(17), color: "FFFFFF" })],
         })
       );
     });
@@ -549,7 +566,7 @@ function buildSidebarBody(data: ResumeData, template: ResumeTemplate): (Paragrap
       sidebarChildren.push(
         new Paragraph({
           spacing: { after: 20 },
-          children: [new TextRun({ text: l.name, size: 17, color: "FFFFFF" })],
+          children: [new TextRun({ text: l.name, size: sz(17), color: "FFFFFF" })],
         })
       );
     });
@@ -561,7 +578,7 @@ function buildSidebarBody(data: ResumeData, template: ResumeTemplate): (Paragrap
       sidebarChildren.push(
         new Paragraph({
           spacing: { after: 20 },
-          children: [new TextRun({ text: c, size: 17, color: "FFFFFF" })],
+          children: [new TextRun({ text: c, size: sz(17), color: "FFFFFF" })],
         })
       );
     });
@@ -638,17 +655,17 @@ function buildGenericBody(data: ResumeData, template: ResumeTemplate): (Paragrap
     new Paragraph({
       spacing: { after: 40 },
       children: [
-        new TextRun({ text: data.fullName || "Your Name", bold: true, size: 40, color: hex(template.accent) }),
+        new TextRun({ text: data.fullName || "Your Name", bold: true, size: sz(40), color: hex(template.accent) }),
       ],
     }),
     new Paragraph({
       spacing: { after: 100 },
-      children: [new TextRun({ text: data.title || "", size: 24, color: "444444" })],
+      children: [new TextRun({ text: data.title || "", size: sz(24), color: "444444" })],
     }),
     new Paragraph({
       spacing: { after: 200 },
       border: { bottom: { color: "CCCCCC", space: 4, style: BorderStyle.SINGLE, size: 4 } },
-      children: [new TextRun({ text: contactLine(data), size: 19, color: "555555" })],
+      children: [new TextRun({ text: contactLine(data), size: sz(19), color: "555555" })],
     }),
   ];
 
@@ -724,8 +741,14 @@ function buildGenericBody(data: ResumeData, template: ResumeTemplate): (Paragrap
 
 export async function generateDocx(
   data: ResumeData,
-  template: ResumeTemplate
+  template: ResumeTemplate,
+  paperSize: PaperSize = paperSizes.letter,
+  font: FontOption = fonts[0],
+  fontSize: FontSizeOption = fontSizeOptions[1]
 ): Promise<Blob> {
+  DOCX_FONT = font.docxName;
+  DOCX_SCALE = fontSize.scale;
+
   let children: (Paragraph | Table)[];
 
   switch (template.layout) {
@@ -753,11 +776,25 @@ export async function generateDocx(
       : { top: 720, bottom: 720, left: 860, right: 860 };
 
   const doc = new Document({
+    styles: {
+      default: {
+        document: {
+          run: {
+            font: DOCX_FONT,
+            size: sz(22),
+          },
+        },
+      },
+    },
     sections: [
       {
         properties: {
           page: {
             margin: pageMargin,
+            size: {
+              width: convertInchesToTwip(paperSize.widthIn),
+              height: convertInchesToTwip(paperSize.heightIn),
+            },
           },
         },
         children,
