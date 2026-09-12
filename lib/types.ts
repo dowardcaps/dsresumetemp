@@ -66,6 +66,9 @@ export interface ResumeData {
   photoSizeIn?: number;
   /** Custom accent color (hex) overriding the selected template's default. */
   accentColor?: string;
+  /** Optional signature line (underline + printed name) for a wet
+   *  signature after printing, shown at the lower-right of the sheet. */
+  showSignatureLine?: boolean;
 }
 
 export type TemplateLayout =

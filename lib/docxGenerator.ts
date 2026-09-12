@@ -50,21 +50,68 @@ function contactLine(data: ResumeData, separator = "   |   "): string {
 
 /** A section heading rendered as a colored bar across the section width —
  *  mirrors the on-screen "BarSection" component (Clean List, ATS Classic). */
-function barHeading(text: string, bgHex: string, fgHex: string): Paragraph {
-  return new Paragraph({
-    shading: { type: ShadingType.CLEAR, color: "auto", fill: hex(bgHex) },
-    spacing: { before: 220, after: 90 },
-    children: [
-      new TextRun({
-        text: text.toUpperCase(),
-        bold: true,
-        size: sz(18),
-        color: hex(fgHex),
-        font: DOCX_FONT,
-        characterSpacing: 20,
+/** A section heading rendered as a colored bar across the section width —
+ *  mirrors the on-screen "BarSection" component (Clean List, ATS Classic).
+ *  Uses a borderless single-cell table (not a shaded paragraph) because
+ *  paragraph shading only ever hugs the text's own line height with no
+ *  breathing room, while the on-screen version has real padding
+ *  (px-2.5 py-1) around the text inside the colored box — a shaded
+ *  paragraph alone can't reproduce that, only a cell's margins can.
+ *  Returns [table, spacer] — spread this at the call site. */
+function barHeading(text: string, bgHex: string, fgHex: string): (Paragraph | Table)[] {
+  const box = new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: {
+      top: NO_BORDER,
+      bottom: NO_BORDER,
+      left: NO_BORDER,
+      right: NO_BORDER,
+      insideHorizontal: NO_BORDER,
+      insideVertical: NO_BORDER,
+    },
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            shading: { type: ShadingType.CLEAR, color: "auto", fill: hex(bgHex) },
+            margins: { top: 70, bottom: 70, left: 150, right: 150 },
+            borders: NO_CELL_BORDERS,
+            children: [
+              new Paragraph({
+                spacing: { before: 0, after: 0 },
+                children: [
+                  new TextRun({
+                    text: text.toUpperCase(),
+                    bold: true,
+                    size: sz(18),
+                    color: hex(fgHex),
+                    font: DOCX_FONT,
+                    characterSpacing: 20,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
       }),
     ],
   });
+  // A table has no "spacing before/after" of its own the way a paragraph
+  // does, so add small spacers to preserve the gap between sections (this
+  // paragraph's own font size is shrunk to ~1pt so it contributes no
+  // visible line of its own — only the explicit before/after gap).
+  const spacerBefore = new Paragraph({
+    run: { size: 2 },
+    spacing: { before: 160, after: 0 },
+    children: [],
+  });
+  const spacerAfter = new Paragraph({
+    run: { size: 2 },
+    spacing: { before: 0, after: 120 },
+    children: [],
+  });
+  return [spacerBefore, box, spacerAfter];
 }
 
 /** A section heading in accent-colored text with a thin gray rule under it —
@@ -239,6 +286,42 @@ function referencesParagraphs(data: ResumeData): Paragraph[] {
   return out;
 }
 
+/** Optional wet-signature block: an underline (a paragraph top border)
+ *  above the applicant's printed name, right-aligned. Word doesn't have
+ *  an easy way to pin content to the literal bottom of a page the way
+ *  the on-screen preview does with a flex "mt-auto" — this is placed as
+ *  the final content instead, with extra spacing before it so it sits
+ *  low on the page for a normal one-page resume. `indentLeftIn` narrows
+ *  the line so it doesn't span the full page width. */
+function signatureParagraphs(data: ResumeData, indentLeftIn?: number): Paragraph[] {
+  if (!data.showSignatureLine) return [];
+  const indent = indentLeftIn ? { left: convertInchesToTwip(indentLeftIn) } : undefined;
+  return [
+    new Paragraph({ spacing: { before: 600 }, children: [] }),
+    new Paragraph({
+      alignment: AlignmentType.RIGHT,
+      indent,
+      border: { top: { color: "9CA3AF", space: 4, style: BorderStyle.SINGLE, size: 4 } },
+      spacing: { before: 100, after: 20 },
+      children: [
+        new TextRun({ text: data.fullName || "Applicant Name", bold: true, size: sz(21) }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.RIGHT,
+      indent,
+      children: [
+        new TextRun({
+          text: "SIGNATURE OVER PRINTED NAME",
+          size: sz(15),
+          color: "6B7280",
+          characterSpacing: 10,
+        }),
+      ],
+    }),
+  ];
+}
+
 /* -------------------------------------------------------------------- */
 /* Layout 1 — ATS Classic (centered-classic)                             */
 /* Centered header, small info-row strip, muted gray bar section labels  */
@@ -333,23 +416,23 @@ function buildAtsClassicBody(data: ResumeData): (Paragraph | Table)[] {
   }
 
   if (data.summary) {
-    out.push(barHeading("Profile", BAR_BG, BAR_FG));
+    out.push(...barHeading("Profile", BAR_BG, BAR_FG));
     out.push(textParagraph(data.summary));
   }
   if (data.experience.length > 0) {
-    out.push(barHeading("Experience", BAR_BG, BAR_FG));
+    out.push(...barHeading("Experience", BAR_BG, BAR_FG));
     out.push(...experienceParagraphs(data));
   }
   if (data.education.length > 0) {
-    out.push(barHeading("Education", BAR_BG, BAR_FG));
+    out.push(...barHeading("Education", BAR_BG, BAR_FG));
     out.push(...educationParagraphs(data));
   }
   if (data.skills.length > 0) {
-    out.push(barHeading("Skills", BAR_BG, BAR_FG));
+    out.push(...barHeading("Skills", BAR_BG, BAR_FG));
     out.push(textParagraph(data.skills.join("   •   ")));
   }
   if (data.languages.length > 0) {
-    out.push(barHeading("Languages", BAR_BG, BAR_FG));
+    out.push(...barHeading("Languages", BAR_BG, BAR_FG));
     out.push(
       textParagraph(
         data.languages.map((l) => `${l.name}${l.level ? ` (${l.level})` : ""}`).join("   •   ")
@@ -357,13 +440,14 @@ function buildAtsClassicBody(data: ResumeData): (Paragraph | Table)[] {
     );
   }
   if (data.certifications.length > 0) {
-    out.push(barHeading("Certifications", BAR_BG, BAR_FG));
+    out.push(...barHeading("Certifications", BAR_BG, BAR_FG));
     out.push(textParagraph(data.certifications.join("   •   ")));
   }
   if (data.references.length > 0) {
-    out.push(barHeading("References", BAR_BG, BAR_FG));
+    out.push(...barHeading("References", BAR_BG, BAR_FG));
     out.push(...referencesParagraphs(data));
   }
+  out.push(...signatureParagraphs(data, 3.3));
 
   return out;
 }
@@ -437,11 +521,11 @@ function buildCleanListBody(data: ResumeData, template: ResumeTemplate): (Paragr
   }
 
   if (data.summary) {
-    out.push(barHeading("Profile", BAR_BG, BAR_FG));
+    out.push(...barHeading("Profile", BAR_BG, BAR_FG));
     out.push(textParagraph(data.summary));
   }
   if (data.experience.length > 0) {
-    out.push(barHeading("Experience", BAR_BG, BAR_FG));
+    out.push(...barHeading("Experience", BAR_BG, BAR_FG));
     data.experience.forEach((exp) => {
       out.push(
         new Paragraph({
@@ -470,7 +554,7 @@ function buildCleanListBody(data: ResumeData, template: ResumeTemplate): (Paragr
     });
   }
   if (data.education.length > 0) {
-    out.push(barHeading("Education", BAR_BG, BAR_FG));
+    out.push(...barHeading("Education", BAR_BG, BAR_FG));
     data.education.forEach((edu) => {
       out.push(
         new Paragraph({
@@ -485,7 +569,7 @@ function buildCleanListBody(data: ResumeData, template: ResumeTemplate): (Paragr
     });
   }
   if (data.skills.length > 0 || data.languages.length > 0) {
-    out.push(barHeading("Skills", BAR_BG, BAR_FG));
+    out.push(...barHeading("Skills", BAR_BG, BAR_FG));
     if (data.skills.length > 0) out.push(textParagraph(data.skills.join("   •   "), { after: 40 }));
     if (data.languages.length > 0) {
       out.push(
@@ -494,13 +578,14 @@ function buildCleanListBody(data: ResumeData, template: ResumeTemplate): (Paragr
     }
   }
   if (data.certifications.length > 0) {
-    out.push(barHeading("Certifications", BAR_BG, BAR_FG));
+    out.push(...barHeading("Certifications", BAR_BG, BAR_FG));
     out.push(textParagraph(data.certifications.join("   •   ")));
   }
   if (data.references.length > 0) {
-    out.push(barHeading("References", BAR_BG, BAR_FG));
+    out.push(...barHeading("References", BAR_BG, BAR_FG));
     out.push(...referencesParagraphs(data));
   }
+  out.push(...signatureParagraphs(data, 3.3));
 
   return out;
 }
@@ -601,6 +686,7 @@ function buildSidebarBody(data: ResumeData, template: ResumeTemplate): (Paragrap
     mainChildren.push(ruleHeading("References", accent));
     mainChildren.push(...referencesParagraphs(data));
   }
+  mainChildren.push(...signatureParagraphs(data));
   if (mainChildren.length === 0) {
     // A table cell can't be empty in docx — keep the column present even
     // if the user hasn't filled in any main-column content yet.
@@ -735,6 +821,7 @@ function buildGenericBody(data: ResumeData, template: ResumeTemplate): (Paragrap
     out.push(ruleHeading("References", template.accent));
     out.push(...referencesParagraphs(data));
   }
+  out.push(...signatureParagraphs(data, 3.3));
 
   return out;
 }

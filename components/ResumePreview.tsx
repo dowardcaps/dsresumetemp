@@ -82,6 +82,38 @@ function Section({
   );
 }
 
+/** Optional wet-signature block: an underline with the applicant's printed
+ *  name beneath it, right-aligned at the lower-right of the sheet. Only
+ *  rendered when the user opts in via the form. `textColor` lets it adapt
+ *  to a dark sidebar background when it ends up there. */
+function SignatureBlock({
+  data,
+  textColor = "text-neutral-800",
+  lineColor = "#9CA3AF",
+}: {
+  data: ResumeData;
+  textColor?: string;
+  lineColor?: string;
+}) {
+  if (!data.showSignatureLine) return null;
+  return (
+    <div className="mt-auto flex justify-end pt-8">
+      <div className="text-center">
+        <div
+          className="w-44 border-t"
+          style={{ borderColor: lineColor }}
+        />
+        <p className={`mt-1 text-[calc(11px*var(--resume-font-scale))] font-semibold ${textColor}`}>
+          {data.fullName || "Applicant Name"}
+        </p>
+        <p className={`text-[calc(8.5px*var(--resume-font-scale))] uppercase tracking-[0.1em] ${textColor} opacity-70`}>
+          Signature Over Printed Name
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function BarSection({
   title,
   bg,
@@ -284,7 +316,7 @@ function CenteredClassicLayout({ data, template, paperSize, font, fontSize }: Re
   return (
     <div
       id="resume-sheet"
-      className="aspect-[8.5/11] w-full bg-white p-8 text-neutral-900 shadow-2xl"
+      className="flex aspect-[8.5/11] w-full flex-col bg-white p-8 text-neutral-900 shadow-2xl"
     style={{
       aspectRatio: `${paperSize.widthIn} / ${paperSize.heightIn}`,
       fontFamily: font.cssStack,
@@ -358,6 +390,7 @@ function CenteredClassicLayout({ data, template, paperSize, font, fontSize }: Re
           </BarSection>
         )}
       </div>
+      <SignatureBlock data={data} lineColor="#9CA3AF" />
     </div>
   );
 }
@@ -367,7 +400,7 @@ function BannerHeadersLayout({ data, template, paperSize, font, fontSize }: Resu
   return (
     <div
       id="resume-sheet"
-      className="aspect-[8.5/11] w-full bg-white p-8 text-neutral-900 shadow-2xl"
+      className="flex aspect-[8.5/11] w-full flex-col bg-white p-8 text-neutral-900 shadow-2xl"
     style={{
       aspectRatio: `${paperSize.widthIn} / ${paperSize.heightIn}`,
       fontFamily: font.cssStack,
@@ -448,6 +481,7 @@ function BannerHeadersLayout({ data, template, paperSize, font, fontSize }: Resu
           </BarSection>
         )}
       </div>
+      <SignatureBlock data={data} lineColor="#9CA3AF" />
     </div>
   );
 }
@@ -541,7 +575,7 @@ function SidebarLeftDarkLayout({ data, template, paperSize, font, fontSize }: Re
         )}
       </div>
 
-      <div className="flex-1 p-5">
+      <div className="flex flex-1 flex-col p-5">
         {data.summary && (
           <RuleSection title="Profile" accent={template.accent}>
             <p className="text-[calc(11px*var(--resume-font-scale))] text-neutral-700">{data.summary}</p>
@@ -562,6 +596,7 @@ function SidebarLeftDarkLayout({ data, template, paperSize, font, fontSize }: Re
             <ReferencesBlock data={data} />
           </RuleSection>
         )}
+        <SignatureBlock data={data} lineColor="#9CA3AF" />
       </div>
     </div>
   );

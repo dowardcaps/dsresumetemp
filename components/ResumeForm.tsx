@@ -805,6 +805,30 @@ export default function ResumeForm({ data, onChange }: ResumeFormProps) {
           ))}
         </div>
       </section>
+
+      <section className="flex flex-col gap-2 pb-4">
+        <h2 className="font-display text-[13px] font-semibold tracking-tight text-stamp-dark">
+          Signature
+        </h2>
+        <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-ink-700 bg-paper-200 p-3">
+          <input
+            type="checkbox"
+            checked={data.showSignatureLine ?? false}
+            onChange={(e) => update("showSignatureLine", e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 accent-stamp"
+          />
+          <span className="flex flex-col gap-0.5">
+            <span className="text-[12px] font-semibold text-stamp-dark">
+              Add a signature line
+            </span>
+            <span className="text-[11px] leading-snug text-ink-600">
+              Adds an underline with your printed name at the lower-right
+              of the sheet, for a wet (handwritten) signature after
+              printing.
+            </span>
+          </span>
+        </label>
+      </section>
     </div>
   );
 }
